@@ -28,7 +28,7 @@ class Game:
         #Return true if move was accepted
         return True
 
-    def state(self):
+    def over(self):
         board = self.board
         for y, row in enumerate(board):
             for x, chip in enumerate(row):
@@ -75,7 +75,7 @@ class Game:
 #Two player game
 game = Game()
 color = "R"
-while not game.state():
+while not game.over():
     print(game.board)
     move = int(input(f"{color}, enter your move: "))
     if game.move(color, move):
