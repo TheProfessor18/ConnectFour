@@ -1,88 +1,16 @@
-import numpy as np
+from game import Game
+from visualize import Visualization
 
-class Game:
+newGame = Game()
+vis = Visualization()
 
-    emptyValue = "E"
-    winner = ""
-
-    #Create the board
-    board = np.full((6,7), emptyValue)
-
-    def move(self, color, position):
-        column = self.board[:,position]
-        for y, chip in enumerate(column):
-
-            #error handling required for the first one since it will reference past the end of the array
-            try:
-                if chip == self.emptyValue and column[y+1] != self.emptyValue:
-                    column[y] = color
-                    break
-            except IndexError:
-                if chip == self.emptyValue:
-                    column[y] = color
-                    break
-        else:
-            #Invalid move, try again
-            return False
-
-        #Return true if move was accepted
-        return True
-
-    def over(self):
-        board = self.board
-        for y, row in enumerate(board):
-            for x, chip in enumerate(row):
-                if chip != self.emptyValue:
-                    #check all around the chip for matching ones
-                    #Only have to check one direction because other direction will be checked by other chips
-
-                    #horizontal
-                    try:
-                        if chip == row[x+1] == row[x+2] == row[x+3]:
-                            self.winner = chip
-                            return True
-                    except IndexError:
-                        pass
-
-                    #vertical
-                    try:
-                        if chip == board[y+1][x] == board[y+2][x] == board[y+3][x]:
-                            self.winner = chip
-                            return True
-                    except IndexError:
-                        pass
-
-                    #diagonal 1
-                    try:
-                        if chip == board[y+1][x+1] == board[y+2][x+2] == board[y+3][x+3]:
-                            self.winner = chip
-                            return True
-                    except IndexError:
-                        pass
-
-                    #diagonal 2
-                    try:
-                        if chip == board[y-1][x+1] == board[y-2][x+2] == board[y-3][x+3]:
-                            self.winner = chip
-                            return True
-                    except IndexError:
-                        pass
-        #Return False if no wins detected
-        return False
-
-
-
-#Two player game
-game = Game()
-color = "R"
-while not game.over():
-    print(game.board)
+color = -1
+while not newGame.over():
+    vis.display(newGame.board)
     move = int(input(f"{color}, enter your move: "))
-    if game.move(color, move):
-        if color == "R":
-            color = "B"
+    if newGame.move(color, move):
+        if color == -1:
+            color = 1
         else:
-            color = "R"
-print(f"The winner is {game.winner}")
-
-
+            color = -1
+print(f"The winner is {newGame.winner}")
