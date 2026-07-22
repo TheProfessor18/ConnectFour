@@ -8,6 +8,7 @@ color = -1
 while not newGame.over():
     vis.display(newGame.board)
     move = int(input(f"{color}, enter your move: "))
+    #make the inputted move, but only change the player if the move is accepted.
     if newGame.move(color, move):
         if color == -1:
             color = 1
