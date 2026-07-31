@@ -2,11 +2,12 @@ import numpy as np
 
 class Game:
 
-    emptyValue = 0
-    winner = 0
+    def __init__(self):
+        self.emptyValue = 0
+        self.winner = 0
 
-    #Create the board
-    board = np.full((6,7), emptyValue)
+        #Create the board
+        self.board = np.full((6,7), self.emptyValue)
 
     def move(self, color, position):
         column = self.board[:,position]
@@ -30,6 +31,10 @@ class Game:
 
     def over(self):
         board = self.board
+
+        if 0 not in board:
+            return True
+
         for y, row in enumerate(board):
             for x, chip in enumerate(row):
                 if chip != self.emptyValue:

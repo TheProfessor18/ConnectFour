@@ -9,24 +9,24 @@ class Layer:
         self.weights = np.random.uniform(-1, 1, (width, inputwidth))
         self.biases = np.random.uniform(-1, 1, width)
 
+    def result(self, inputData):
+        data = activationFunction((self.weights @ inputData) + self.biases)
+        return data
+
 class Model:
     def __init__(self, hiddenLayers, hiddenWidth):
-        inputWidth = 42
-        outputWidth = 7
-        self.layers = np.array([])
+        self.layers = [
+            Layer(16, 42),
+            Layer(16,16),
+            Layer(16,16),
+            Layer(7, 16)
+        ]
 
-        for x in range(hiddenLayers + 1):
-            if x == 0:
-                newLayer = Layer(hiddenWidth, inputWidth)
-            elif x == hiddenLayers:
-                newLayer = Layer(outputWidth, hiddenWidth)
-            else:
-                newLayer = Layer(hiddenWidth, hiddenWidth)
-
-            np.append(self.layers, newLayer)
-
-    def result(self, inputData):
-        data = inputData
+    def forward(self, input):
+        data = input.reshape(42)
         for layer in self.layers:
-            data = activationFunction((layer.weights @ data) + layer.biases)
+            data = layer.result(data)
         return data
+
+    def backPropagate(self, index, loss):
+        pass
