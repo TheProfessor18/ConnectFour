@@ -1,15 +1,16 @@
 from game import Game
 from model import Model
 from agent import Agent
+from visualize import Visualization
 
 game = Game()
 model = Model(4, 20)
 
-player1 = Agent(model, 1)
-player2 = Agent(model, -1)
+player1 = Agent(model, 1, 6)
+player2 = Agent(model, -1, 6)
 
 color = 1
-while not game.over():
+while not game.over(True):
     if color == 1:
         move = player1.action(game.board)
     else:
@@ -18,3 +19,6 @@ while not game.over():
         color *= -1
     print(game.board)
 print(f'Winner: {game.winner}.')
+vis = Visualization()
+vis.display(game.board)
+vis.tk.mainloop()

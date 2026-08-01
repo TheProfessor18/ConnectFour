@@ -29,9 +29,17 @@ class Game:
         #Return true if move was accepted
         return True
 
-    def over(self):
+    def legalMoves(self):
+        if self.over():
+            return np.array([])
+        else:
+            #gets all the legal moves and makes it into a 1D array (it starts as a tuple, then when converted is 2D so must be raveled
+            return np.asarray(np.where(self.board[0] == 0)).ravel()
+
+    def over(self, feedback = False):
         board = self.board
 
+        #for ties
         if 0 not in board:
             return True
 
@@ -45,6 +53,8 @@ class Game:
                     try:
                         if chip == row[x+1] == row[x+2] == row[x+3]:
                             self.winner = chip
+                            if feedback:
+                                print(f'Win found from x:{x} to x:{x+3}, at y:{y}')
                             return True
                     except IndexError:
                         pass
@@ -53,6 +63,8 @@ class Game:
                     try:
                         if chip == board[y+1][x] == board[y+2][x] == board[y+3][x]:
                             self.winner = chip
+                            if feedback:
+                                print(f'Win found from y:{y} to y:{y + 3}, at x:{x}')
                             return True
                     except IndexError:
                         pass
@@ -61,6 +73,8 @@ class Game:
                     try:
                         if chip == board[y+1][x+1] == board[y+2][x+2] == board[y+3][x+3]:
                             self.winner = chip
+                            if feedback:
+                                print(f'Win found from x:{x}, y:{y} to x:{x + 3}, y:{y + 3}')
                             return True
                     except IndexError:
                         pass
@@ -69,6 +83,8 @@ class Game:
                     try:
                         if chip == board[y-1][x+1] == board[y-2][x+2] == board[y-3][x+3]:
                             self.winner = chip
+                            if feedback:
+                                print(f'Win found from x:{x}, y:{y} to x:{x + 3}, y:{y - 3}')
                             return True
                     except IndexError:
                         pass
@@ -83,7 +99,7 @@ if __name__ == "__main__":
     color = -1
     while not game.over():
         print(game.board)
-        move = int(input(f"{color}, enter your move: "))
+        move = int(input(f"{color}, enter your move: \nLegal moves: {game.legalMoves()}"))
         if game.move(color, move):
             if color == -1:
                 color = 1

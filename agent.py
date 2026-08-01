@@ -1,93 +1,82 @@
 from game import Game
 from model import Model
 import numpy as np
-
-#go through and optimize this stuff later
-from copy import deepcopy, copy
+from math import log, floor
 
 class Agent:
 
-    def __init__(self, model, color):
+    def __init__(self, model, color, startingforsight):
         self.model = model
         self.color = color
+        tempGame = Game()
+        self.normalMoveCount = len(tempGame.legalMoves())
+        self.startingforsight = startingforsight
+
+    def lookAhead(self, movesAhead, board, color):
+        testGame = Game()
+        testGame.board = np.copy(board)
+        possibleMoves = testGame.legalMoves()
+        canWin = False
+        forcedLoss = False
+        winningMoves = np.array([])
+        losingMoves = np.array([])
+        if movesAhead == 0:
+            return False, False, np.array([]), np.array([])
+        else:
+            for move in possibleMoves:
+                testGame.board = np.copy(board)
+                testGame.move(color, move)
+                if testGame.over() and testGame.winner == color:
+                    canWin = True
+                    winningMoves = np.append(winningMoves, move)
+                else:
+                    opponentCanWin, opponentForcedLoss, opponentWinningMoves, opponentLosingMoves = self.lookAhead(movesAhead - 1, testGame.board, color * -1)
+                    if opponentCanWin:
+                        losingMoves = np.append(losingMoves, move)
+                    if opponentForcedLoss:
+                        winningMoves = np.append(winningMoves, move)
+                        canWin = True
+            if np.array_equal(possibleMoves, losingMoves):
+                forcedLoss = True
+            return canWin, forcedLoss, winningMoves, losingMoves
 
     def action(self, board):
         #get the neural networks moves, and then compare to protective logic.
-        boardForModel = board
-        if self.color == -1:
+        if self.color == 1:
+            boardForModel = board
+        else:
             #invert board if playing second
-            boardForModel *= -1
+            boardForModel = board * -1
 
         modelMoves = self.model.forward(boardForModel)
 
-        if self.color == -1:
-            #set board back
-            boardForModel *= -1
-
-        #create a dummy game to test moves on.
         testGame = Game()
+        testGame.board = board
+        legalMoves = testGame.legalMoves()
 
-        # check all seven moves for obvious actions to do or avoid, could eventually extend much farther
-        possibleMoves = np.array([])
-        #boardCopy = np.copy(board)
+        #adjusts forsight depending on how many legal moves are left
+        forsight = floor(self.startingforsight * (log(self.normalMoveCount)/log(len(legalMoves))))
+        print(forsight)
+        lineToWin, doomed, winningMoves, losingMoves = self.lookAhead(forsight, board, self.color)
 
-        for x in range(7):
-            testGame.board = np.copy(board)
-            if testGame.move(self.color, x):
-                if testGame.over() and testGame.winner == self.color:
-                    #reward this move, and make it
-                    #model.backpropogate() until it is the argmax
-                    print(f'Found winning move: {x}')
-                    #print(testGame.board)
-                    return x
-                else:
-                    enemyColor = self.color * -1
-                    savedState = np.copy(testGame.board)
-                    enemyCanWin = False
-                    for o in range(7):
-                        testGame.board = np.copy(savedState)
-                        #print(testGame.board)
-                        if testGame.move(enemyColor, o):
-                            if testGame.over() and testGame.winner == enemyColor:
-                                print(f'Opponent can win if I go to {x} as {self.color}')
-                                #punish allowing this move in the model, and prohibit moving here.
-                                enemyCanWin = True
-                                #model.backpropogate() until it is the argmin
-                        else:
-                            print('Illegal opponent move')
-                    if not enemyCanWin:
-                        print(f'Moving to {x} is safe')
-                        #the opponent can't win with this move, so we'll allow it.
-                        possibleMoves = np.append(possibleMoves, x)
-            else:
-                #move is illegal, probably adjust the model, but maybe not as aggresively.
-                pass
-                print(f'Illegal Move: {x}')
-
-        print(possibleMoves)
-
-
-        if possibleMoves.size == 0:
-            #forced loss, very bad
-            print('Forced loss or tie')
-            testGame.board = board
-            while not testGame.move(self.color, np.argmax(modelMoves)):
-                modelMoves = np.delete(modelMoves, np.argmax(modelMoves))
-            print(f'Moving to {np.argmax(modelMoves)} as {self.color}')
-            return np.argmax(modelMoves)
+        if lineToWin:
+            print(f'Winning line found at {int(winningMoves[0])}')
+            #backpropogate to strengthen this move in the model
+            return int(winningMoves[0])
+        elif doomed:
+            print('Game is lost, making random moves until end')
+            return legalMoves[0]
         else:
+            possibleMoves = legalMoves
+            possibleMoves = np.setdiff1d(possibleMoves, losingMoves)
+            for move in modelMoves:
+                if np.argmax(modelMoves) in possibleMoves:
+                    return np.argmax(modelMoves)
+                else:
+                    modelMoves[np.argmax(modelMoves)] = 0
 
-            move = np.argmax(modelMoves)
-            print(move)
-            #clean this up
-            while move not in possibleMoves:
-                move = np.argmax(modelMoves)
-                print(move)
-                #possibleMoves = np.delete(possibleMoves, np.where(possibleMoves == np.argmax(modelMoves)))
-                modelMoves[np.argmax(modelMoves)] = 0
-                print(possibleMoves)
-            print(f'Moving to {move} as {self.color}')
-            return move
+
+
 
 
 
