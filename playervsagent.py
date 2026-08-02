@@ -1,14 +1,20 @@
 from game import Game
 from visualize import Visualization
 from agent import Agent
-from model import Model
+from model import Model, Layer
+from pickle import dump, load
 
 newGame = Game()
 vis = Visualization()
-model = Model(4, 20)
+model = Model([
+            Layer(16, 42),
+            Layer(16,16),
+            Layer(16,16),
+            Layer(7, 16)
+        ])
 agent = Agent(model, -1, 6)
 
-color = 1
+color = -1
 while not newGame.over():
     vis.display(newGame.board)
     if color == 1:

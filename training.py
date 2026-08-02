@@ -1,13 +1,18 @@
 from game import Game
-from model import Model
+from model import Model, Layer
 from agent import Agent
 from visualize import Visualization
 
 game = Game()
-model = Model(4, 20)
+model = Model([
+            Layer(16, 42),
+            Layer(16,16),
+            Layer(16,16),
+            Layer(7, 16)
+        ])
 
-player1 = Agent(model, 1, 6)
-player2 = Agent(model, -1, 6)
+player1 = Agent(model, 1,  6)
+player2 = Agent(model, -1,  6)
 
 color = 1
 while not game.over(True):

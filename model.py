@@ -14,13 +14,8 @@ class Layer:
         return data
 
 class Model:
-    def __init__(self, hiddenLayers, hiddenWidth):
-        self.layers = [
-            Layer(16, 42),
-            Layer(16,16),
-            Layer(16,16),
-            Layer(7, 16)
-        ]
+    def __init__(self, layers):
+        self.layers = layers
 
     def forward(self, input):
         data = input.reshape(42)

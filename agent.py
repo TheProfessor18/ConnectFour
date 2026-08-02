@@ -12,7 +12,9 @@ class Agent:
         self.normalMoveCount = len(tempGame.legalMoves())
         self.startingforsight = startingforsight
 
+
     def lookAhead(self, movesAhead, board, color):
+        #if (board in self.movesDatabase):
         testGame = Game()
         testGame.board = np.copy(board)
         possibleMoves = testGame.legalMoves()
@@ -55,8 +57,13 @@ class Agent:
         legalMoves = testGame.legalMoves()
 
         #adjusts forsight depending on how many legal moves are left
-        forsight = floor(self.startingforsight * (log(self.normalMoveCount)/log(len(legalMoves))))
-        print(forsight)
+        try:
+            forsightMultiplier = log(self.normalMoveCount)/log(len(legalMoves))
+        except:
+            #eliminate the division by zero problem.
+            forsightMultiplier = 1
+        forsight = floor(self.startingforsight * (forsightMultiplier))
+
         lineToWin, doomed, winningMoves, losingMoves = self.lookAhead(forsight, board, self.color)
 
         if lineToWin:
