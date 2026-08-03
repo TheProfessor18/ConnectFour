@@ -5,11 +5,13 @@ class Game:
     def __init__(self):
         self.emptyValue = 0
         self.winner = 0
+        self.moveSequence = ''
 
         #Create the board
         self.board = np.full((6,7), self.emptyValue)
 
     def move(self, color, position):
+        self.moveSequence += str(position)
         column = self.board[:,position]
         for y, chip in enumerate(column):
 

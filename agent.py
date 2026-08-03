@@ -2,6 +2,9 @@ from game import Game
 from model import Model
 import numpy as np
 from math import log, floor
+from pickle import load
+from treedatastorage import Database
+import multiprocessing
 
 class Agent:
 
@@ -11,6 +14,12 @@ class Agent:
         tempGame = Game()
         self.normalMoveCount = len(tempGame.legalMoves())
         self.startingforsight = startingforsight
+        try:
+            with open('moveDatabase.pkl', 'rb') as file:
+                self.database = load(file)
+        except:
+            self.database = Database
+
 
 
     def lookAhead(self, movesAhead, board, color):
