@@ -15,17 +15,32 @@ class Database:
         self.presentWorkingSet = {k: v for k, v in self.presentWorkingSet.items() if k.startswith(key)}
 
     def demote(self, key):
-        pass
-        #make this move an item from the working set into the main database
+        self.entries[key] = self.presentWorkingSet[key]
+        self.presentWorkingSet.pop(key)
 
-    def newEntry(self, key, board, winningMoves, losingMoves, otherLegalMoves, colortoMove):
-        self.presentWorkingSet[key] = self.Entry(board, winningMoves, losingMoves, otherLegalMoves, colortoMove)
+    def parent(self, key, generationsBack = 1):
+        #gets the one before
+        return self.entries[key[:-generationsBack]]
+
+    def parentMove(self, key, generationsBack = 1):
+        return key[-generationsBack]
+
+    def updateAncestors(self, key):
+        #check for forced loss
+        parentdata = self.parent(key)
+        if parentdata.legalMoves == parentdata.losingMoves:
+            np.append(self.parent(key, 2).winningMoves, self.parentMove(key, 2))
+            np.append(self.parent(key, 3).losingMoves, self.parentMove(key, 3))
+            self.updateAncestors(key[:-2])
+
+    def newEntry(self, key, board, winningMoves, losingMoves, legalMoves, colortoMove):
+        self.presentWorkingSet[key] = self.Entry(board, winningMoves, losingMoves, legalMoves, colortoMove)
 
     class Entry:
-        def __init__(self, board, winningMoves, losingMoves, otherLegalMoves, colortoMove):
+        def __init__(self, board, winningMoves, losingMoves, legalMoves, colortoMove):
             self.board = board
             self.winningMoves = winningMoves
             self.losingMoves = losingMoves
-            self.otherLegalMoves = otherLegalMoves
+            self.legalMoves = legalMoves
             self.colortoMove = colortoMove
 
