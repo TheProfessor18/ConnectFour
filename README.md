@@ -10,4 +10,4 @@ Things to add:
 Make the neural network actually learn, and make the focus eventually.
 If hard looking ahead remains a strategy, it should look ahead during the opponents turn as well, I've started working on this in the experimental branch.
 
-Of course, I will also be working on programming the hardware code eventually. This will use an Arduino and micro-computer (Raspberry Pi maybe), working together. Computer vision will probable use OpenCV.
+Of course, I will also be working on programming the hardware code, which is currently in the hardware branch. This will use an Arduino and micro-computer (Raspberry Pi maybe), working together. The Arduino will take Cartesian coordinates via serial and turn them into servo movements. The micro-board will handle the actual gameplay, learning and computer vision, and will send coordinates to the Arduino. Computer vision will probable use OpenCV.
