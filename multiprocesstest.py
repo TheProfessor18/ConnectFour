@@ -7,7 +7,7 @@ from pickle import load, dump
 from itertools import islice
 import traceback
 
-def backgroundSearch(conn):
+def backgroundSearch(conn, database):
     print('Background search starting...', flush=True)
     testGame = Game()
 
@@ -21,8 +21,11 @@ def backgroundSearch(conn):
 
     if len(database.presentWorkingSet) == 0:
         # start off empty database
+        #print('database empty')
         legalMoves = testGame.legalMoves()
         database.newEntry('', testGame.board, np.array([]), np.array([]), legalMoves, 1)
+    else:
+        database.focus = database.presentWorkingSet.copy()
     try:
         while True:
             #see if there's a new move
@@ -34,7 +37,13 @@ def backgroundSearch(conn):
                     if database.entries[moveSequence].winningMoves.size != 0:
                         move = database.entries[moveSequence].winningMoves[0]
                     else:
-                        move = database.entries[moveSequence].legalMoves[0]
+                        if database.entries[moveSequence].losingMoves.size != 0:
+                            possibleMoves = np.setdiff1d(database.entries[moveSequence].legalMoves, database.entries[moveSequence].losingMoves)
+                            print(database.entries[moveSequence].losingMoves)
+                            print(possibleMoves)
+                            move = possibleMoves[0]
+                        else:
+                            move = database.entries[moveSequence].legalMoves[0]
                 except:
                     traceback.print_exc()
                 print(f'Moving to {move}')
@@ -43,7 +52,7 @@ def backgroundSearch(conn):
 
             #print("I'm running!", flush=True)
             #make sure each round doesn't take too long...
-            movesToProcess = dict(islice(database.focus.items(), 1000))
+            movesToProcess = dict(islice(database.focus.items(), 200))
             for key, data in movesToProcess.items():
                 #print(f'Looking at {key}...', flush=True)
                 testGame.board = np.copy(data.board)
@@ -53,9 +62,12 @@ def backgroundSearch(conn):
                     testGame.move(data.colorToMove, move)
                     if testGame.over():
                         if testGame.winner == data.colorToMove: #This means a win, not a tie
-                            np.append(database.presentWorkingSet[key].winningMoves, move)
-                            np.append(database.parent(key).losingMoves, database.parentMove(key))
-                            database.updateAncestors(key)
+                            try:
+                                database.presentWorkingSet[key].winningMoves = np.append(database.presentWorkingSet[key].winningMoves, move)
+                                database.parent(key).losingMoves = np.append(database.parent(key).losingMoves, database.parentMove(key))
+                                database.updateAncestors(key)
+                            except:
+                                traceback.print_exc()
                     else:
                         legalMoves = testGame.legalMoves()
                         database.newEntry(key+str(move), np.copy(testGame.board), np.array([]), np.array([]), legalMoves, data.colorToMove * -1)
@@ -67,14 +79,22 @@ def backgroundSearch(conn):
 
 if __name__ == '__main__':
 
+    try:
+        with open('moveDatabase.pkl', 'rb') as file:
+            database = load(file)
+        print('Found database. Successfully loaded.')
+    except FileNotFoundError:
+        print('Making new database', flush=True)
+        database = Database()
+
     newGame = Game()
     color = 1
 
     mainConn, searchConn = multiprocessing.Pipe()
 
-    background = multiprocessing.Process(target=backgroundSearch, args=(searchConn,))
+    background = multiprocessing.Process(target=backgroundSearch, args=(searchConn, database))
     background.start()
-    sleep(4)
+    sleep(5)
 
     while not newGame.over():
         move = int(input('Enter you move'))

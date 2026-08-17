@@ -25,14 +25,14 @@ class Database:
         return self.entries[key[:-generationsBack]]
 
     def parentMove(self, key, generationsBack = 1):
-        return key[-generationsBack]
+        return int(key[-generationsBack])
 
     def updateAncestors(self, key):
         #check for forced loss
         parentdata = self.parent(key)
         if np.array_equal(parentdata.legalMoves, parentdata.losingMoves):
-            np.append(self.parent(key, 2).winningMoves, self.parentMove(key, 2))
-            np.append(self.parent(key, 3).losingMoves, self.parentMove(key, 3))
+            self.parent(key, 2).winningMoves = np.append(self.parent(key, 2).winningMoves, self.parentMove(key, 2))
+            self.parent(key, 3).losingMoves = np.append(self.parent(key, 3).losingMoves, self.parentMove(key, 3))
             self.updateAncestors(key[:-2])
 
     def newEntry(self, key, board, winningMoves, losingMoves, legalMoves, colorToMove):

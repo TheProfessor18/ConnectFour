@@ -31,6 +31,9 @@ class Game:
         #Return true if move was accepted
         return True
 
+    def undoLastMoveinSequence(self):
+        self.moveSequence = self.moveSequence[:-1]
+
     def legalMoves(self):
         if self.over():
             return np.array([])
