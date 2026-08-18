@@ -1,29 +1,25 @@
 from game import Game
-from model import Model, Layer
 from agent import Agent
-from visualize import Visualization
 
-game = Game()
-model = Model([
-            Layer(16, 42),
-            Layer(16,16),
-            Layer(16,16),
-            Layer(7, 16)
-        ])
+agent1 = Agent(1)
+agent2 = Agent(-1)
 
-player1 = Agent(model, 1,  6)
-player2 = Agent(model, -1,  6)
+for x in range(1000):
+    game = Game()
 
-color = 1
-while not game.over(True):
-    if color == 1:
-        move = player1.action(game.board)
-    else:
-        move = player2.action(game.board)
-    if game.move(color, move):
-        color *= -1
-    print(game.board)
-print(f'Winner: {game.winner}.')
-vis = Visualization()
-vis.display(game.board)
-vis.tk.mainloop()
+    currentAgent = agent2
+    while not game.over():
+        #alternate agents
+        if currentAgent == agent2:
+            currentAgent = agent1
+        else:
+            currentAgent = agent2
+
+        game.move(currentAgent.color, currentAgent.getMove(game.board))
+        print(game.board)
+    if game.winner == currentAgent.color:
+        pass
+
+
+agent1.saveModel()
+
