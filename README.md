@@ -1,4 +1,4 @@
-This is my ongoing attempt to build a robot to play Connect Four, and eventually other board games.
+This is my ongoing attempt to build a robot to play Connect Four, and eventually other board games. Some newer features in progress on on other branches.
 
 Use playervsagent.py to play against the program.
 
