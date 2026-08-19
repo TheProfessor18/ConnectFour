@@ -18,8 +18,7 @@ for x in range(1000):
         game.move(currentAgent.color, currentAgent.getMove(game.board))
         print(game.board)
     if game.winner == currentAgent.color:
-        pass
-
+        currentAgent.trainWin(game.board)
 
 agent1.saveModel()
 

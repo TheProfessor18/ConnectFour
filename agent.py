@@ -32,11 +32,18 @@ class Agent:
             for move in testGame.legalMoves():
                 testGame.board = np.copy(board)
                 testGame.move(self.color, move)
-                possibleMoves[move] = self.model.forward(np.reshape(testGame.board, 42))
+                #add the best move, times own color so that the max will be the losest if playing as -1
+                possibleMoves[move] = self.model.forward(np.reshape(testGame.board, 42)) * self.color
             bestMove = max(possibleMoves, key=possibleMoves.get)
             return bestMove
         else:
             return np.random.choice(testGame.legalMoves)
+
+    def trainWin(self, board):
+        #backpropogation
+        self.model.backPropagate(np.reshape(board, 42), self.color)
+
+
 
     def saveModel(self):
         with open('modelData.pkl', 'wb') as file:

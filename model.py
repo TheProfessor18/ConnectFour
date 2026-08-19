@@ -2,7 +2,13 @@ import numpy as np
 
 def activationFunction(z):
     #sigmoid
-    return 1/(1+(np.exp(-z)))
+    #return 1/(1+(np.exp(-z)))
+    #tanh
+    return (2/(1+(np.exp(-2*z))))-1
+
+def derivativeActivationFunction(z):
+    #tanh'
+    return 1 - (activationFunction(z)**2)
 
 class Layer:
     def __init__(self, width, inputwidth):
@@ -23,5 +29,8 @@ class Model:
             data = layer.result(data)
         return data
 
-    def backPropagate(self, index, loss):
-        pass
+    def backPropagate(self, input, target):
+        actualValue = self.forward(input)
+        loss = 0.5*((target - actualValue)**2)
+        for layer in reversed(self.layers):
+
